@@ -1,0 +1,43 @@
+ /* Tema Naturaleza */
+    .card-amor {
+      font-family: 'Georgia', serif;
+      background-color: #f9f4f0;
+      color: #4f332f;
+      border: 1px solid #cfe9dc;
+    }
+    .card-amor .card-title {
+      font-family: 'Arial', sans-serif;
+      color: #bd0000;  /* Verde bosque */
+      font-weight: bold;
+    }
+    .card-amor .card-text {
+      color: #3b3b3b;
+    }
+    .card-tecno {
+      font-family: 'Courier New', monospace;
+      background-color: #f4f4f8;
+      color: #414177;
+      border: 1px solid #d1d1e0;
+    }
+    .card-tecno .card-title {
+      font-family: 'Verdana', sans-serif;
+      color: #020263;  /* Azul oscuro */
+      font-weight: bold;
+    }
+    .card-tecno .card-text {
+      color: #3b374b;
+    }
+    .card-hambre{
+      font-family: 'Tahoma', sans-serif;
+      background-color: #fff4e5;
+      color: #d4b505;
+      border: 1px solid #f0d8c1;
+    }
+    .card-hambre .card-title {
+      font-family: 'Impact', sans-serif;
+      color: #cace06;  /* Naranja */
+      font-weight: bold;
+    }
+    .card-hambre .card-text {
+      color: #5c4b3b;
+    }
