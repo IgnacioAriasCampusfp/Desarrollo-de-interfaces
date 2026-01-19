@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Indicadores</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <header>
+        <nav>
+            <a href="index.html" class="logo">EcoDigital</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Inicio</a>
+                <a href="Indicadores.html" class="nav-link active">Indicadores</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Listado de Indicadores</h1>
+
+        <!-- Botón que redirige a nuevo_indicador.html -->
+        <a href="nuevo_indicador.html" id="addButton" class="btn btn-primary btn-block">Añadir Indicador</a>
+
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; justify-content: center; flex-wrap: wrap;">
+            <select id="filtroTipo" onchange="aplicarFiltros()"
+                style="padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; flex: 1; min-width: 150px; max-width: 200px;">
+                <option value="">Todos los Tipos</option>
+            </select>
+            <select id="filtroCategoria" onchange="aplicarFiltros()"
+                style="padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; flex: 1; min-width: 150px; max-width: 200px;">
+                <option value="">Todas las Categorías</option>
+            </select>
+            <select id="filtroAmbito" onchange="aplicarFiltros()"
+                style="padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; flex: 1; min-width: 150px; max-width: 200px;">
+                <option value="">Todos los Ámbitos</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table id="indicadores-table">
+                <thead>
+                    <tr>
+                        <th>Informe</th>
+                        <th>Tipo</th>
+                        <th>Categoria</th>
+                        <th>Nombre</th>
+                        <th>Descripcion</th>
+                        <th>Valor</th>
+                        <th>Unidad</th>
+                        <th>Fecha</th>
+                        <th>Ambito</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Filas generadas por JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = 'http://localhost:8081/indicador/todos';
+        let listaIndicadores = [];
+
+        // Función para mostrar los indicadores
+        function cargarIndicadores() {
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('Error al obtener los datos de la API');
+                    return response.json();
+                })
+                .then(indicadores => {
+                    listaIndicadores = indicadores; // Guardamos los datos
+                    rellenarFiltros();
+                    aplicarFiltros();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function rellenarFiltros() {
+            const tipos = [...new Set(listaIndicadores.map(i => i.tipo))];
+            const categorias = [...new Set(listaIndicadores.map(i => i.categoria))];
+            const ambitos = [...new Set(listaIndicadores.map(i => i.ambito))];
+
+            const selTipo = document.getElementById('filtroTipo');
+            const selCat = document.getElementById('filtroCategoria');
+            const selAmb = document.getElementById('filtroAmbito');
+
+            // Limpiar opciones previas (manteniendo la primera)
+            // No reseteamos si ya tienen valor seleccionado para evitar molestias si recargamos data
+            if (selTipo.options.length <= 1) tipos.forEach(t => selTipo.innerHTML += `<option value="${t}">${t}</option>`);
+            if (selCat.options.length <= 1) categorias.forEach(c => selCat.innerHTML += `<option value="${c}">${c}</option>`);
+            if (selAmb.options.length <= 1) ambitos.forEach(a => selAmb.innerHTML += `<option value="${a}">${a}</option>`);
+        }
+
+        function aplicarFiltros() {
+            const tipo = document.getElementById('filtroTipo').value;
+            const categoria = document.getElementById('filtroCategoria').value;
+            const ambito = document.getElementById('filtroAmbito').value;
+
+            const filtrados = listaIndicadores.filter(ind => {
+                return (tipo === '' || ind.tipo === tipo) &&
+                    (categoria === '' || ind.categoria === categoria) &&
+                    (ambito === '' || ind.ambito === ambito);
+            });
+
+            renderizarTabla(filtrados);
+        }
+
+        function renderizarTabla(indicadores) {
+            const tbody = document.querySelector('#indicadores-table tbody');
+            tbody.innerHTML = "";
+
+            indicadores.forEach(indicador => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td style="text-align: center;">
+                        <button class="action-btn report-btn" onclick="verInforme(${indicador.id})" title="Ver Informe">📄</button>
+                    </td>
+                    <td>${indicador.tipo}</td>
+                    <td>${indicador.categoria}</td>
+                    <td>${indicador.nombre}</td>
+                    <td>${indicador.descripcion}</td>
+                    <td>${indicador.valor}</td>
+                    <td>${indicador.unidad}</td>
+                    <td>${indicador.fecha}</td>
+                    <td>${indicador.ambito}</td>
+                    <td class="action-buttons" style="display: flex; flex-direction: column; gap: 5px;">
+                        <button class="action-btn modify-btn" onclick="modificarIndicador(${indicador.id})" title="Modificar">Modificar</button>
+                        <button class="action-btn delete-btn" onclick="eliminarIndicador(${indicador.id})" title="Eliminar">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(fila);
+            });
+        }
+
+        function verInforme(id) {
+            const indicador = listaIndicadores.find(ind => ind.id == id);
+            if (indicador) {
+                const params = new URLSearchParams(indicador).toString();
+                window.location.href = `informe.html?${params}`;
+            } else {
+                console.error("Indicador no encontrado con ID:", id);
+            }
+        }
+
+        function modificarIndicador(id) {
+            const indicador = listaIndicadores.find(ind => ind.id == id);
+            if (indicador) {
+                const params = new URLSearchParams(indicador).toString();
+                window.location.href = `modificar_indicador.html?${params}`;
+            } else {
+                console.error("Indicador no encontrado con ID:", id);
+            }
+        }
+
+        function eliminarIndicador(id) {
+            if (confirm('¿Seguro que quieres eliminar el indicador con ID ' + id + '?')) {
+                fetch(`http://localhost:8081/indicador/eliminar/${id}`, { method: 'DELETE' })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Error al eliminar indicador');
+                        alert('Indicador eliminado');
+                        cargarIndicadores();
+                    })
+                    .catch(error => console.error(error));
+            }
+        }
+
+        cargarIndicadores();
+    </script>
+
+</body>
+
+</html>

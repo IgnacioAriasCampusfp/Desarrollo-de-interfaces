@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modificar Indicador</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Modificar Indicador</h1>
+
+    <form id="indicadorForm">
+      <label for="id">ID</label>
+      <input type="text" id="id" name="id" placeholder="ID del indicador" readonly />
+
+      <label for="tipo">Tipo</label>
+      <input type="text" id="tipo" name="tipo" placeholder="Tipo de indicador" required />
+
+      <label for="categoria">Categoría</label>
+      <input type="text" id="categoria" name="categoria" placeholder="Categoría" required />
+
+      <label for="nombre">Nombre</label>
+      <input type="text" id="nombre" name="nombre" placeholder="Nombre del indicador" required />
+
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" name="descripcion" placeholder="Descripción del indicador" rows="3"
+        required></textarea>
+
+      <label for="valor">Valor</label>
+      <input type="text" id="valor" name="valor" placeholder="Valor del indicador" required />
+
+      <label for="unidad">Unidad</label>
+      <input type="text" id="unidad" name="unidad" placeholder="Unidad de medida" required />
+
+      <label for="fecha">Fecha</label>
+      <input type="date" id="fecha" name="fecha" required />
+
+      <label for="ambito">Ámbito</label>
+      <input type="text" id="ambito" name="ambito" placeholder="Ámbito del indicador" required />
+
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+        <button type="button" onclick="guardarIndicador()" class="btn btn-primary">Guardar</button>
+        <a href="Indicadores.html" class="btn btn-danger">Volver</a>
+      </div>
+    </form>
+  </div>
+
+
+  <div class="message" id="message"></div>
+
+  <script>
+    // Lee 'id' desde la query string y, si existe, rellena el formulario
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      const msg = document.getElementById('message');
+
+      if (id) {
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+          if (params.has(input.name)) {
+            let val = params.get(input.name);
+            // Ajustar formato de fecha si es necesario (YYYY-MM-DD)
+            if (input.type === 'date' && val && val.length > 10) {
+              val = val.substring(0, 10);
+            }
+            input.value = val;
+          }
+        });
+
+        document.getElementById('id').readOnly = true;
+        msg.textContent = 'Datos cargados para modificación.';
+        msg.style.color = 'green';
+
+      } else {
+        msg.textContent = 'Modo creación: rellene los datos.';
+        msg.style.color = 'blue';
+      }
+    }
+
+    // Enviar formulario: POST para nuevo, PUT para actualizar si hay id
+    async function guardarIndicador() {
+      const form = document.getElementById("indicadorForm");
+      const formData = new FormData(form);
+      const indicador = {};
+
+      formData.forEach((value, key) => {
+        indicador[key] = value;
+      });
+
+      try {
+        const response = await fetch("http://localhost:8081/indicador/nuevo", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(indicador)
+        });
+
+        if (response.ok) {
+          document.getElementById("message").textContent = "Indicador añadido con éxito.";
+          document.getElementById("message").style.color = "green";
+          form.reset();
+        } else {
+          const error = await response.text();
+          document.getElementById("message").textContent = "Error al añadir indicador: " + error;
+          document.getElementById("message").style.color = "red";
+        }
+
+      } catch (error) {
+        document.getElementById("message").textContent = "Error de red: " + error.message;
+        document.getElementById("message").style.color = "red";
+      }
+    }
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+
+</body>
+
+</html>

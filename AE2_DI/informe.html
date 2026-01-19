@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe - EcoDigital</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">EcoDigital</a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Inicio</a>
+                <a href="Indicadores.html" class="nav-link">Indicadores</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Informe Detallado de Indicador</h1>
+
+        <div id="report-content"
+            style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+            <p style="color: #64748b; font-style: italic;">Cargando datos del informe...</p>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center;">
+            <a href="Indicadores.html" class="cta-button" style="background-color: #64748b;">Volver al Listado</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const reportContent = document.getElementById('report-content');
+
+            if (!params.has('id')) {
+                reportContent.innerHTML = '<p style="color: red; text-align: center;">No se han recibido datos para generar el informe.</p>';
+                return;
+            }
+
+            // Mapeo de campos a etiquetas legibles
+            const labels = {
+                id: 'ID del Indicador',
+                nombre: 'Nombre',
+                tipo: 'Tipo',
+                categoria: 'Categoría',
+                descripcion: 'Descripción',
+                valor: 'Valor Registrado',
+                unidad: 'Unidad de Medida',
+                fecha: 'Fecha de Registro',
+                ambito: 'Ámbito'
+            };
+
+            let html = '<div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">';
+
+            // Recorremos los parámetros y generamos el HTML
+            // Orden preferido de visualización
+            const order = ['nombre', 'valor', 'unidad', 'tipo', 'categoria', 'ambito', 'fecha', 'descripcion', 'id'];
+
+            order.forEach(key => {
+                const value = params.get(key) || '-';
+                const label = labels[key] || key;
+
+                // Estilo especial para ciertos campos
+                let valueStyle = 'font-size: 1.1rem; color: #1e293b;';
+                if (key === 'nombre') valueStyle = 'font-size: 1.5rem; font-weight: bold; color: #2563eb;';
+                if (key === 'valor') valueStyle = 'font-size: 2rem; font-weight: 800; color: #0d9488;';
+
+                html += `
+                    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
+                        <span style="display: block; font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">${label}</span>
+                        <div style="${valueStyle}">${value} ${(key === 'valor' && params.get('unidad')) ? '<span style="font-size: 1rem; color: #64748b;">' + params.get('unidad') + '</span>' : ''}</div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            reportContent.innerHTML = html;
+        });
+    </script>
+
+</body>
+
+</html>
